@@ -251,7 +251,7 @@ namespace ConsolidatedApi.Data
                 )
                 .Metadata.SetValueComparer(new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<Dictionary<string, object>?>(
                     (c1, c2) => c1 == null && c2 == null || (c1 != null && c2 != null && c1.Count == c2.Count && c1.All(kvp => c2.ContainsKey(kvp.Key) && Equals(kvp.Value, c2[kvp.Key]))),
-                    c => c == null ? 0 : c.Aggregate(0, (a, v) => HashCode.Combine(a, v.Key.GetHashCode(), v.Value?.GetHashCode() ?? 0)),
+                    c => c == null ? 0 : c.Aggregate(0, (a, v) => HashCode.Combine(a, v.Key.GetHashCode(), v.Value == null ? 0 : v.Value.GetHashCode())),
                     c => c == null ? null : new Dictionary<string, object>(c)));
         }
     }
