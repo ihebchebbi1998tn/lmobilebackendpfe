@@ -12,6 +12,8 @@ namespace ConsolidatedApi.Models
         [StringLength(250)]
         public string Description { get; set; } = string.Empty;
         [Required]
+        public string Model { get; set; } = string.Empty;
+        [Required]
         public string Reference { get; set; } = string.Empty;
         public decimal Price { get; set; }
         public int Tva { get; set; }

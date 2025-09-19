@@ -9,6 +9,9 @@ namespace ConsolidatedApi.Models
         [StringLength(50)]
         public string Title { get; set; } = string.Empty;
         [Required]
+        [StringLength(50)]
+        public string Name { get; set; } = string.Empty;
+        [Required]
         [StringLength(250)]
         public string Description { get; set; } = string.Empty;
         public decimal Price { get; set; }

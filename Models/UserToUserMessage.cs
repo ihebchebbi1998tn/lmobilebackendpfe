@@ -12,6 +12,7 @@ namespace ConsolidatedApi.Models
         [Required]
         public string ChatId { get; set; } = string.Empty;
         public DateTime SentAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public bool IsRead { get; set; } = false;
         public DateTime? ReadAt { get; set; }
         
