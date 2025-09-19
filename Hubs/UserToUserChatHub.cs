@@ -1,28 +1,28 @@
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.SignalR;
 using System.Security.Claims;
 
 namespace ConsolidatedApi.Hubs
 {
     [Authorize]
-    public class ChatHub : Hub
+    public class UserToUserChatHub : Hub
     {
-        public async Task JoinGroup(string groupName)
+        public async Task JoinChat(string chatId)
         {
-            await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
+            await Groups.AddToGroupAsync(Context.ConnectionId, chatId);
         }
 
-        public async Task LeaveGroup(string groupName)
+        public async Task LeaveChat(string chatId)
         {
-            await Groups.RemoveFromGroupAsync(Context.ConnectionId, groupName);
+            await Groups.RemoveFromGroupAsync(Context.ConnectionId, chatId);
         }
 
-        public async Task SendMessage(string groupName, string message)
+        public async Task SendMessage(string chatId, string message)
         {
             var userId = Context.User?.FindFirstValue(ClaimTypes.NameIdentifier);
             var userName = Context.User?.FindFirstValue(ClaimTypes.Name) ?? "Unknown User";
 
-            await Clients.Group(groupName).SendAsync("ReceiveMessage", new
+            await Clients.Group(chatId).SendAsync("ReceiveMessage", new
             {
                 userId,
                 userName,

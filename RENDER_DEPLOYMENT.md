@@ -13,8 +13,9 @@ JWT_AUDIENCE=ConsolidatedApi
 JWT_ACCESS_TOKEN_EXPIRATION_MINUTES=60
 JWT_REFRESH_TOKEN_EXPIRATION_DAYS=7
 
+
 # Frontend URL (set to your Vercel URL)
-FRONTEND_URL=https://lmobileportal.vercel.app/
+FRONTEND_URL=https://your-frontend-app.vercel.app
 
 # Admin User
 ADMIN_EMAIL=elfadanes@gmail.com

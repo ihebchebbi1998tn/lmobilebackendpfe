@@ -22,8 +22,10 @@ services:
         value: 7
       - key: JWT_REFRESH_SECRET
         value: 98f7h1F9C8WzQl2kxHa7Xt5Tz0Yv93Lm
+      - key: STRIPE_SECRET_KEY
+        value: your_stripe_secret_key_here
       - key: FRONTEND_URL
-        value: https://lmobileportal.vercel.app/
+        value: https://your-frontend-app.vercel.app
       - key: ADMIN_EMAIL
         value: elfadanes@gmail.com
       - key: ADMIN_PASSWORD
