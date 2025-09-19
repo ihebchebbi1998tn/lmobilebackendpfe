@@ -4,8 +4,8 @@ services:
     runtime: docker
     plan: free
     region: oregon
-    repo: https://github.com/ihebchebbi1998tn/pfelmobile.git
-    rootDir: Portal/ConsolidatedApi
+    repo: https://github.com/ihebchebbi1998tn/lmobilebackendpfe.git
+    rootDir: .
     dockerfilePath: ./Dockerfile
     envVars:
       - key: DATABASE_URL
