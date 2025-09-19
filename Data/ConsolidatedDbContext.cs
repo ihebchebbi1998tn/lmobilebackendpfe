@@ -96,20 +96,28 @@ namespace ConsolidatedApi.Data
                 .HasForeignKey(uip => uip.OrganizationId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Configure value conversions for PostgreSQL
+            // Configure value conversions for PostgreSQL with comparers
             builder.Entity<Role>()
                 .Property(r => r.Permissions)
                 .HasConversion(
                     v => string.Join(',', v),
                     v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
-                );
+                )
+                .Metadata.SetValueComparer(new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<List<string>>(
+                    (c1, c2) => c1!.SequenceEqual(c2!),
+                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                    c => c.ToList()));
 
             builder.Entity<UiPage>()
                 .Property(u => u.FieldsToNotDisplay)
                 .HasConversion(
                     f => string.Join(',', f),
                     f => f.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
-                );
+                )
+                .Metadata.SetValueComparer(new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<List<string>>(
+                    (c1, c2) => c1!.SequenceEqual(c2!),
+                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                    c => c.ToList()));
 
             // Chat API relationships
             builder.Entity<ChatMessage>()
@@ -152,7 +160,7 @@ namespace ConsolidatedApi.Data
             // Service API relationships
             builder.Entity<CustomerDevice>()
                 .HasOne(cd => cd.Device)
-                .WithMany()
+                .WithMany(d => d.CustomerDevices)
                 .HasForeignKey(cd => cd.DeviceId)
                 .OnDelete(DeleteBehavior.Restrict);
 
@@ -234,13 +242,17 @@ namespace ConsolidatedApi.Data
                 .HasForeignKey(oi => oi.SparePartId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Configure JSON conversion for Notification.Data
+            // Configure JSON conversion for Notification.Data with comparer
             builder.Entity<Notification>()
                 .Property(n => n.Data)
                 .HasConversion(
                     v => v == null ? null : System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
                     v => v == null ? null : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, (System.Text.Json.JsonSerializerOptions?)null)
-                );
+                )
+                .Metadata.SetValueComparer(new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<Dictionary<string, object>?>(
+                    (c1, c2) => c1 == null && c2 == null || (c1 != null && c2 != null && c1.Count == c2.Count && c1.All(kvp => c2.ContainsKey(kvp.Key) && Equals(kvp.Value, c2[kvp.Key]))),
+                    c => c == null ? 0 : c.Aggregate(0, (a, v) => HashCode.Combine(a, v.Key.GetHashCode(), v.Value?.GetHashCode() ?? 0)),
+                    c => c == null ? null : new Dictionary<string, object>(c)));
         }
     }
 }
