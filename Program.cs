@@ -140,10 +140,17 @@ builder.Services.AddCors(options =>
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy
-            .WithOrigins(frontendUrl, "https://*.vercel.app", "https://*.onrender.com")
+            .WithOrigins(
+                frontendUrl, 
+                "http://localhost:3000", 
+                "https://lmobileportal.vercel.app",
+                "https://*.vercel.app",
+                "https://*.onrender.com"
+            )
             .AllowAnyMethod()
             .AllowAnyHeader()
-            .AllowCredentials();
+            .AllowCredentials()
+            .SetIsOriginAllowedToAllowWildcardSubdomains();
     });
 });
 
