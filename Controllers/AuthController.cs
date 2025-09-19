@@ -9,8 +9,8 @@ using ConsolidatedApi.Models;
 namespace ConsolidatedApi.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
-    public class AuthController : ControllerBase
+ [Route("user/api/auth")]  
+ public class AuthController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
