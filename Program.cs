@@ -216,7 +216,6 @@ app.MapHub<ChatHub>("/chat/chat/hub");
 app.MapHub<UserToUserChatHub>("/chat/chat/UserToUser/hub");
 app.MapHub<NotificationHub>("/notification/notification/hub");
 
-// Health check endpoint
-app.MapGet("/health", () => Results.Ok(new { status = "healthy", timestamp = DateTime.UtcNow }));
+// Health check endpoint is handled by HealthController
 
 app.Run();
