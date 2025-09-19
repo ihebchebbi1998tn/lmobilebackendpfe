@@ -13,6 +13,8 @@ JWT_AUDIENCE=ConsolidatedApi
 JWT_ACCESS_TOKEN_EXPIRATION_MINUTES=60
 JWT_REFRESH_TOKEN_EXPIRATION_DAYS=7
 
+# Stripe
+STRIPE_SECRET_KEY=your_stripe_secret_key_here
 
 # Frontend URL (set to your Vercel URL)
 FRONTEND_URL=https://your-frontend-app.vercel.app

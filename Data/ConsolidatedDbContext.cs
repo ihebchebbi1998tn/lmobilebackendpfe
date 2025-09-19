@@ -33,8 +33,11 @@ namespace ConsolidatedApi.Data
         public DbSet<Feedback> Feedbacks { get; set; }
         public DbSet<InstallationRequest> InstallationRequests { get; set; }
         public DbSet<Invoice> Invoices { get; set; }
+        public DbSet<InvoiceItem> InvoiceItems { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<ServiceRequest> ServiceRequests { get; set; }
+        public DbSet<ServiceRequestImage> ServiceRequestImages { get; set; }
         public DbSet<SparePart> SpareParts { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
@@ -194,6 +197,50 @@ namespace ConsolidatedApi.Data
                 .WithMany()
                 .HasForeignKey(f => f.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Feedback>()
+                .HasOne(f => f.ServiceRequest)
+                .WithOne(sr => sr.Feedback)
+                .HasForeignKey<Feedback>(f => f.ServiceRequestId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.Entity<ServiceRequestImage>()
+                .HasOne(sri => sri.ServiceRequest)
+                .WithMany(sr => sr.Images)
+                .HasForeignKey(sri => sri.ServiceRequestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<InstallationRequest>()
+                .HasOne(ir => ir.Device)
+                .WithMany(d => d.Requests)
+                .HasForeignKey(ir => ir.DeviceId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<InvoiceItem>()
+                .HasOne(ii => ii.Invoice)
+                .WithMany(i => i.Items)
+                .HasForeignKey(ii => ii.InvoiceId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<OrderItem>()
+                .HasOne(oi => oi.Order)
+                .WithMany(o => o.Items)
+                .HasForeignKey(oi => oi.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<OrderItem>()
+                .HasOne(oi => oi.SparePart)
+                .WithMany(sp => sp.OrderItems)
+                .HasForeignKey(oi => oi.SparePartId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Configure JSON conversion for Notification.Data
+            builder.Entity<Notification>()
+                .Property(n => n.Data)
+                .HasConversion(
+                    v => v == null ? null : System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
+                    v => v == null ? null : System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, object>>(v, (System.Text.Json.JsonSerializerOptions?)null)
+                );
         }
     }
 }
