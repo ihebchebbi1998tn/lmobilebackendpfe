@@ -18,7 +18,7 @@ namespace ConsolidatedApi.Controllers
 
             // TODO: Implement actual user-to-user chat session logic
             // For now, return empty array to prevent 404
-            return Ok(new[] { });
+            return Ok(new object[] { });
         }
 
         [HttpPost("upload")]

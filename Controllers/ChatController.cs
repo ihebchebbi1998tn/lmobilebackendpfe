@@ -18,7 +18,7 @@ namespace ConsolidatedApi.Controllers
 
             // TODO: Implement actual chat session logic
             // For now, return empty array to prevent 404
-            return Ok(new[] { });
+            return Ok(new object[] { });
         }
 
         [HttpDelete("{id}")]
