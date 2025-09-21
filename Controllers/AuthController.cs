@@ -5,6 +5,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using ConsolidatedApi.Models;
+using ConsolidatedApi.Services;
 
 namespace ConsolidatedApi.Controllers
 {

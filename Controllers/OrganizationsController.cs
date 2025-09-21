@@ -21,7 +21,7 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddOrganization([FromForm] CreateOrganizationRequest organization)
+        public async Task<IActionResult> AddOrganization([FromForm] SimpleCreateOrganizationRequest organization)
         {
             try
             {
@@ -90,7 +90,7 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpPost("update")]
-        public async Task<IActionResult> UpdateOrganization([FromForm] UpdateOrganizationRequest organization)
+        public async Task<IActionResult> UpdateOrganization([FromForm] SimpleUpdateOrganizationRequest organization)
         {
             try
             {
@@ -219,7 +219,7 @@ namespace ConsolidatedApi.Controllers
         }
     }
 
-    public class CreateOrganizationRequest
+    public class SimpleCreateOrganizationRequest
     {
         public string Name { get; set; } = string.Empty;
         public string? Email { get; set; }
@@ -227,7 +227,7 @@ namespace ConsolidatedApi.Controllers
         public string? Website { get; set; }
     }
 
-    public class UpdateOrganizationRequest
+    public class SimpleUpdateOrganizationRequest
     {
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
