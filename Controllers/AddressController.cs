@@ -159,4 +159,3 @@ namespace ConsolidatedApi.Controllers
         public string Country { get; set; } = string.Empty;
     }
 }
-}

@@ -199,4 +199,3 @@ namespace ConsolidatedApi.Controllers
         public string PaymentMethod { get; set; } = string.Empty;
     }
 }
-}

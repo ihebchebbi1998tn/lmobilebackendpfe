@@ -255,4 +255,3 @@ namespace ConsolidatedApi.Controllers
         public string Currency { get; set; } = "USD";
     }
 }
-}

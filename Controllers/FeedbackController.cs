@@ -86,4 +86,3 @@ namespace ConsolidatedApi.Controllers
         public int Rating { get; set; }
     }
 }
-}

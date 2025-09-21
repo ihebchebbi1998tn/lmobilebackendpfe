@@ -181,4 +181,3 @@ namespace ConsolidatedApi.Controllers
         public int StockQuantity { get; set; }
     }
 }
-}

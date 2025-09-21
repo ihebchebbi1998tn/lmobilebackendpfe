@@ -89,4 +89,3 @@ namespace ConsolidatedApi.Controllers
         public DateTime? WarrantyExpiry { get; set; }
     }
 }
-}
