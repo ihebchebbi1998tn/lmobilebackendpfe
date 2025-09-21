@@ -27,7 +27,7 @@ namespace ConsolidatedApi.Controllers
 
             try
             {
-                var notifications = await _notificationService.GetNotificationsForUserAsync(userId);
+                var notifications = await _notificationService.GetUserNotificationsAsync(userId);
                 return Ok(notifications);
             }
             catch (Exception ex)
@@ -37,7 +37,7 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(string id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
@@ -55,7 +55,7 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> MarkRead(int id)
+        public async Task<IActionResult> MarkRead(string id)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
@@ -63,7 +63,7 @@ namespace ConsolidatedApi.Controllers
 
             try
             {
-                await _notificationService.MarkAsReadAsync(id, userId);
+                await _notificationService.MarkAsReadAsync(id);
                 return Ok(new { message = "Notification marked as read" });
             }
             catch (Exception ex)

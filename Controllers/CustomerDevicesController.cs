@@ -19,7 +19,7 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(string id)
         {
             try
             {
@@ -41,10 +41,12 @@ namespace ConsolidatedApi.Controllers
         {
             try
             {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
                 var device = new CustomerDevice
                 {
                     DeviceId = customerDevice.DeviceId,
-                    CustomerId = customerDevice.CustomerId,
+                    UserId = userId,
+                    SerialNumber = customerDevice.SerialNumber,
                     PurchaseDate = customerDevice.PurchaseDate,
                     WarrantyExpiry = customerDevice.WarrantyExpiry,
                     CreatedAt = DateTime.UtcNow,
@@ -61,7 +63,7 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(string id)
         {
             try
             {
@@ -83,8 +85,8 @@ namespace ConsolidatedApi.Controllers
 
     public class CreateCustomerDeviceRequest
     {
-        public int DeviceId { get; set; }
-        public string CustomerId { get; set; } = string.Empty;
+        public string DeviceId { get; set; } = string.Empty;
+        public string? SerialNumber { get; set; }
         public DateTime PurchaseDate { get; set; }
         public DateTime? WarrantyExpiry { get; set; }
     }

@@ -27,9 +27,9 @@ namespace ConsolidatedApi.Controllers
                 {
                     Name = dto.Name,
                     Model = dto.Model,
-                    SerialNumber = dto.SerialNumber,
-                    Description = dto.Description,
-                    ClientOrganizationId = dto.ClientOrganizationId,
+                    Description = dto.Description ?? string.Empty,
+                    OrganizationId = dto.OrganizationId,
+                    OrganizationName = dto.OrganizationName,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
@@ -55,9 +55,9 @@ namespace ConsolidatedApi.Controllers
                     {
                         Name = deviceDto.Name,
                         Model = deviceDto.Model,
-                        SerialNumber = deviceDto.SerialNumber,
-                        Description = deviceDto.Description,
-                        ClientOrganizationId = deviceDto.ClientOrganizationId,
+                        Description = deviceDto.Description ?? string.Empty,
+                        OrganizationId = deviceDto.OrganizationId,
+                        OrganizationName = deviceDto.OrganizationName,
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow
                     };
@@ -87,8 +87,7 @@ namespace ConsolidatedApi.Controllers
 
                 existingDevice.Name = device.Name;
                 existingDevice.Model = device.Model;
-                existingDevice.SerialNumber = device.SerialNumber;
-                existingDevice.Description = device.Description;
+                existingDevice.Description = device.Description ?? existingDevice.Description;
                 existingDevice.UpdatedAt = DateTime.UtcNow;
 
                 var updatedDevice = await _deviceService.UpdateAsync(existingDevice);
@@ -101,16 +100,16 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] string? searchTerm, [FromQuery] int companyId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAll([FromQuery] string? searchTerm, [FromQuery] string? organizationId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
                 var allDevices = await _deviceService.GetAllAsync();
 
-                // Filter by company if specified
-                if (companyId > 0)
+                // Filter by organization if specified
+                if (!string.IsNullOrWhiteSpace(organizationId))
                 {
-                    allDevices = allDevices.Where(d => d.ClientOrganizationId == companyId).ToList();
+                    allDevices = allDevices.Where(d => d.OrganizationId == organizationId).ToList();
                 }
 
                 // Apply search filter
@@ -118,8 +117,7 @@ namespace ConsolidatedApi.Controllers
                 {
                     allDevices = allDevices.Where(d => 
                         d.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                        d.Model.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                        (d.SerialNumber != null && d.SerialNumber.Contains(searchTerm, StringComparison.OrdinalIgnoreCase))
+                        d.Model.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
                     ).ToList();
                 }
 
@@ -138,7 +136,7 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(string id)
         {
             try
             {
@@ -162,9 +160,9 @@ namespace ConsolidatedApi.Controllers
     {
         public string Name { get; set; } = string.Empty;
         public string Model { get; set; } = string.Empty;
-        public string? SerialNumber { get; set; }
         public string? Description { get; set; }
-        public int ClientOrganizationId { get; set; }
+        public string OrganizationId { get; set; } = string.Empty;
+        public string OrganizationName { get; set; } = string.Empty;
     }
 
     public class UpdateDeviceRequest
@@ -172,7 +170,6 @@ namespace ConsolidatedApi.Controllers
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Model { get; set; } = string.Empty;
-        public string? SerialNumber { get; set; }
         public string? Description { get; set; }
     }
 }

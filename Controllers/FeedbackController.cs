@@ -26,13 +26,11 @@ namespace ConsolidatedApi.Controllers
                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 var newFeedback = new Feedback
                 {
-                    Title = feedback.Title,
                     Content = feedback.Content,
                     Rating = feedback.Rating,
                     ServiceRequestId = feedback.ServiceRequestId,
                     UserId = userId,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    CreatedAt = DateTime.UtcNow
                 };
 
                 var createdFeedback = await _feedbackService.CreateAsync(newFeedback);
@@ -55,10 +53,8 @@ namespace ConsolidatedApi.Controllers
                     return NotFound(new { message = "Feedback not found" });
                 }
 
-                existingFeedback.Title = feedback.Title;
                 existingFeedback.Content = feedback.Content;
                 existingFeedback.Rating = feedback.Rating;
-                existingFeedback.UpdatedAt = DateTime.UtcNow;
 
                 var updatedFeedback = await _feedbackService.UpdateAsync(existingFeedback);
                 return Ok(new { message = "Feedback updated successfully", feedback = updatedFeedback });
@@ -72,16 +68,14 @@ namespace ConsolidatedApi.Controllers
 
     public class CreateFeedbackRequest
     {
-        public string Title { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
         public int Rating { get; set; }
-        public int? ServiceRequestId { get; set; }
+        public string? ServiceRequestId { get; set; }
     }
 
     public class UpdateFeedbackRequest
     {
-        public int Id { get; set; }
-        public string Title { get; set; } = string.Empty;
+        public string Id { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
         public int Rating { get; set; }
     }

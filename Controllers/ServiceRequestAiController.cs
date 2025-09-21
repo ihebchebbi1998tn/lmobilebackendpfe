@@ -27,29 +27,10 @@ namespace ConsolidatedApi.Controllers
 
             try
             {
-                var allRequests = await _serviceRequestAiService.GetAllAsync();
+                var allRequests = await _serviceRequestAiService.GetAiProcessedRequestsAsync(searchTerm, companyId, page, pageSize);
+                var totalCount = await _serviceRequestAiService.GetAiProcessedRequestsCountAsync(searchTerm, companyId);
 
-                // Filter by company if specified
-                if (companyId > 0)
-                {
-                    // Assuming there's a ClientOrganizationId property
-                    // allRequests = allRequests.Where(sr => sr.ClientOrganizationId == companyId).ToList();
-                }
-
-                // Apply search filter
-                if (!string.IsNullOrWhiteSpace(searchTerm))
-                {
-                    // Apply search based on AI service request properties
-                    // allRequests = allRequests.Where(sr => sr.Description.Contains(searchTerm)).ToList();
-                }
-
-                var totalCount = allRequests.Count;
-                var paginatedRequests = allRequests
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList();
-
-                return Ok(new { totalCount, page, pageSize, data = paginatedRequests });
+                return Ok(new { totalCount, page, pageSize, data = allRequests });
             }
             catch (Exception ex)
             {
@@ -58,7 +39,7 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpPut("payment/{id}/{methode}")]
-        public async Task<IActionResult> UpdatePayment(int id, string methode)
+        public async Task<IActionResult> UpdatePayment(string id, string methode)
         {
             try
             {
@@ -86,7 +67,7 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpGet("{id}/download")]
-        public async Task<IActionResult> DownloadInvoice(int id, [FromQuery] string lang, [FromQuery] string city, [FromQuery] string streetName, [FromQuery] string zipCode, [FromQuery] string phone, [FromQuery] string email)
+        public async Task<IActionResult> DownloadInvoice(string id, [FromQuery] string lang, [FromQuery] string city, [FromQuery] string streetName, [FromQuery] string zipCode, [FromQuery] string phone, [FromQuery] string email)
         {
             try
             {
@@ -102,6 +83,6 @@ namespace ConsolidatedApi.Controllers
 
     public class ToggleAiServiceRequest
     {
-        public int Id { get; set; }
+        public string Id { get; set; } = string.Empty;
     }
 }

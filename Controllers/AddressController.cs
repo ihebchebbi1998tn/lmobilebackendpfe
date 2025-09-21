@@ -30,13 +30,11 @@ namespace ConsolidatedApi.Controllers
                 var address = new Address
                 {
                     UserId = userId,
-                    Street = request.Street,
+                    StreetName = request.Street,
                     City = request.City,
                     State = request.State,
-                    PostalCode = request.PostalCode,
-                    Country = request.Country,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
+                    ZipCode = request.PostalCode,
+                    CountryKey = request.Country
                 };
 
                 var createdAddress = await _addressService.CreateAsync(address);
@@ -110,12 +108,11 @@ namespace ConsolidatedApi.Controllers
                     return NotFound(new { message = "Address not found" });
                 }
 
-                existingAddress.Street = request.Street;
+                existingAddress.StreetName = request.Street;
                 existingAddress.City = request.City;
                 existingAddress.State = request.State;
-                existingAddress.PostalCode = request.PostalCode;
-                existingAddress.Country = request.Country;
-                existingAddress.UpdatedAt = DateTime.UtcNow;
+                existingAddress.ZipCode = request.PostalCode;
+                existingAddress.CountryKey = request.Country;
 
                 var updatedAddress = await _addressService.UpdateAsync(existingAddress);
                 return Ok(new { message = "Address updated successfully", address = updatedAddress });

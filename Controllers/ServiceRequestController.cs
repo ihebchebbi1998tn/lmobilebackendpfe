@@ -30,13 +30,11 @@ namespace ConsolidatedApi.Controllers
                 var serviceRequest = new ServiceRequest
                 {
                     Title = dto.Title,
-                    Description = dto.Description,
+                    Description = dto.Description ?? string.Empty,
                     Status = "Pending",
-                    Priority = dto.Priority,
-                    ClientOrganizationId = dto.ClientOrganizationId,
+                    UserId = userId,
                     CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
-                    RequestedBy = userId
+                    UpdatedAt = DateTime.UtcNow
                 };
 
                 var createdServiceRequest = await _serviceRequestService.CreateAsync(serviceRequest);
@@ -60,9 +58,8 @@ namespace ConsolidatedApi.Controllers
                 }
 
                 existingServiceRequest.Title = dto.Title;
-                existingServiceRequest.Description = dto.Description;
+                existingServiceRequest.Description = dto.Description ?? existingServiceRequest.Description;
                 existingServiceRequest.Status = dto.Status;
-                existingServiceRequest.Priority = dto.Priority;
                 existingServiceRequest.UpdatedAt = DateTime.UtcNow;
 
                 var updatedServiceRequest = await _serviceRequestService.UpdateAsync(existingServiceRequest);
@@ -103,7 +100,7 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(string id)
         {
             try
             {
@@ -123,7 +120,7 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] string? searchTerm, [FromQuery] int companyId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAll([FromQuery] string? searchTerm, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
@@ -131,31 +128,10 @@ namespace ConsolidatedApi.Controllers
 
             try
             {
-                var allServiceRequests = await _serviceRequestService.GetAllAsync();
+                var data = await _serviceRequestService.GetByUserIdAsync(userId, searchTerm, page, pageSize);
+                var totalCount = await _serviceRequestService.GetTotalCountByUserIdAsync(userId, searchTerm);
 
-                // Filter by company if specified
-                if (companyId > 0)
-                {
-                    allServiceRequests = allServiceRequests.Where(sr => sr.ClientOrganizationId == companyId).ToList();
-                }
-
-                // Apply search filter
-                if (!string.IsNullOrWhiteSpace(searchTerm))
-                {
-                    allServiceRequests = allServiceRequests.Where(sr => 
-                        sr.Title.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                        (sr.Description != null && sr.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
-                        sr.Status.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
-                    ).ToList();
-                }
-
-                var totalCount = allServiceRequests.Count;
-                var paginatedServiceRequests = allServiceRequests
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList();
-
-                return Ok(new { totalCount, page, pageSize, data = paginatedServiceRequests });
+                return Ok(new { totalCount, page, pageSize, data });
             }
             catch (Exception ex)
             {
@@ -182,21 +158,18 @@ namespace ConsolidatedApi.Controllers
     {
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
-        public string Priority { get; set; } = "Medium";
-        public int ClientOrganizationId { get; set; }
     }
 
     public class UpdateServiceRequestRequest
     {
-        public int Id { get; set; }
+        public string Id { get; set; } = string.Empty;
         public string Title { get; set; } = string.Empty;
         public string? Description { get; set; }
         public string Status { get; set; } = string.Empty;
-        public string Priority { get; set; } = "Medium";
     }
 
     public class ToggleServiceRequestRequest
     {
-        public int Id { get; set; }
+        public string Id { get; set; } = string.Empty;
     }
 }

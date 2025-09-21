@@ -19,7 +19,7 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetById(string id)
         {
             try
             {
@@ -41,13 +41,14 @@ namespace ConsolidatedApi.Controllers
         {
             try
             {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
                 var request = new InstallationRequest
                 {
-                    ClientOrganizationId = installationRequest.ClientOrganizationId,
+                    UserId = userId,
                     DeviceId = installationRequest.DeviceId,
                     RequestedDate = installationRequest.RequestedDate,
                     Status = "Pending",
-                    Description = installationRequest.Description,
+                    Notes = installationRequest.Notes,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
@@ -86,7 +87,7 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(string id)
         {
             try
             {
@@ -106,7 +107,7 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpGet("{id}/download")]
-        public async Task<IActionResult> DownloadInvoice(int id, [FromQuery] string lang, [FromQuery] string city, [FromQuery] string streetName, [FromQuery] string zipCode, [FromQuery] string phone, [FromQuery] string email)
+        public async Task<IActionResult> DownloadInvoice(string id, [FromQuery] string lang, [FromQuery] string city, [FromQuery] string streetName, [FromQuery] string zipCode, [FromQuery] string phone, [FromQuery] string email)
         {
             try
             {
@@ -122,14 +123,13 @@ namespace ConsolidatedApi.Controllers
 
     public class CreateInstallationRequestRequest
     {
-        public int ClientOrganizationId { get; set; }
-        public int DeviceId { get; set; }
+        public string DeviceId { get; set; } = string.Empty;
         public DateTime RequestedDate { get; set; }
-        public string? Description { get; set; }
+        public string? Notes { get; set; }
     }
 
     public class ToggleInstallationRequestRequest
     {
-        public int Id { get; set; }
+        public string Id { get; set; } = string.Empty;
     }
 }

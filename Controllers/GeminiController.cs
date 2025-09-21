@@ -49,7 +49,7 @@ namespace ConsolidatedApi.Controllers
                 });
 
                 var prompt = $"Analyze these users data: {System.Text.Json.JsonSerializer.Serialize(usersData)}. {request.Prompt ?? "Provide insights and recommendations."}";
-                var response = await _geminiService.GenerateContentAsync(prompt);
+                var response = await _geminiService.GenerateResponseAsync(prompt);
 
                 return Ok(new { 
                     message = "Users data analyzed by Gemini", 
@@ -76,22 +76,23 @@ namespace ConsolidatedApi.Controllers
                 var user = await _userService.GetByIdAsync(userId);
                 if (user == null) return Unauthorized();
 
-                var devices = await _deviceService.GetByOrganizationIdAsync(user.OrganizationId ?? "");
-                var devicesData = devices.Select(d => new
-                {
-                    id = d.Id,
-                    name = d.Name,
-                    description = d.Description,
-                    model = d.Model,
-                    reference = d.Reference,
-                    price = d.Price,
-                    tva = d.Tva,
-                    organizationName = d.OrganizationName,
-                    createdAt = d.CreatedAt
-                });
+                var devices = await _deviceService.GetAllAsync(null, 1, int.MaxValue);
+                var devicesData = devices.Where(d => d.OrganizationId == (user.OrganizationId ?? ""))
+                    .Select(d => new
+                    {
+                        id = d.Id,
+                        name = d.Name,
+                        description = d.Description,
+                        model = d.Model,
+                        reference = d.Reference,
+                        price = d.Price,
+                        tva = d.Tva,
+                        organizationName = d.OrganizationName,
+                        createdAt = d.CreatedAt
+                    });
 
                 var prompt = $"Analyze these devices data: {System.Text.Json.JsonSerializer.Serialize(devicesData)}. {request.Prompt ?? "Provide insights about pricing, models, and inventory recommendations."}";
-                var response = await _geminiService.GenerateContentAsync(prompt);
+                var response = await _geminiService.GenerateResponseAsync(prompt);
 
                 return Ok(new { 
                     message = "Devices data analyzed by Gemini", 
@@ -118,23 +119,24 @@ namespace ConsolidatedApi.Controllers
                 var user = await _userService.GetByIdAsync(userId);
                 if (user == null) return Unauthorized();
 
-                var spareParts = await _sparePartService.GetByOrganizationIdAsync(user.OrganizationId ?? "");
-                var sparePartsData = spareParts.Select(sp => new
-                {
-                    id = sp.Id,
-                    title = sp.Title,
-                    name = sp.Name,
-                    description = sp.Description,
-                    price = sp.Price,
-                    partNumber = sp.PartNumber,
-                    category = sp.Category,
-                    stockQuantity = sp.StockQuantity,
-                    organizationId = sp.OrganizationId,
-                    createdAt = sp.CreatedAt
-                });
+                var spareParts = await _sparePartService.GetAllAsync(null, 1, int.MaxValue);
+                var sparePartsData = spareParts.Where(sp => sp.OrganizationId == (user.OrganizationId ?? ""))
+                    .Select(sp => new
+                    {
+                        id = sp.Id,
+                        title = sp.Title,
+                        name = sp.Name,
+                        description = sp.Description,
+                        price = sp.Price,
+                        partNumber = sp.PartNumber,
+                        category = sp.Category,
+                        stockQuantity = sp.StockQuantity,
+                        organizationId = sp.OrganizationId,
+                        createdAt = sp.CreatedAt
+                    });
 
                 var prompt = $"Analyze these spare parts data: {System.Text.Json.JsonSerializer.Serialize(sparePartsData)}. {request.Prompt ?? "Provide insights about inventory levels, pricing optimization, and restocking recommendations."}";
-                var response = await _geminiService.GenerateContentAsync(prompt);
+                var response = await _geminiService.GenerateResponseAsync(prompt);
 
                 return Ok(new { 
                     message = "Spare parts data analyzed by Gemini", 
@@ -157,7 +159,7 @@ namespace ConsolidatedApi.Controllers
 
             try
             {
-                var response = await _geminiService.GenerateContentAsync(request.Question);
+                var response = await _geminiService.GenerateResponseAsync(request.Question);
                 return Ok(new { 
                     message = "Question answered by Gemini", 
                     answer = response 

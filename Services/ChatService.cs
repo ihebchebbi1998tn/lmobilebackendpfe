@@ -67,5 +67,46 @@ namespace ConsolidatedApi.Services
             await _context.SaveChangesAsync();
             return message;
         }
+
+        // Added helper methods to match controller usage
+        public async Task<List<UserToUserChat>> GetUserToUserChatsByUserIdAsync(string userId)
+        {
+            return await _context.UserToUserChats
+                .Where(c => c.User1Id == userId || c.User2Id == userId)
+                .OrderByDescending(c => c.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<List<UserToUserMessage>> GetUserToUserMessagesByChatIdAsync(string chatId)
+        {
+            return await _context.UserToUserMessages
+                .Where(m => m.ChatId == chatId)
+                .OrderBy(m => m.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task<UserToUserChat> CreateUserToUserChatAsync(UserToUserChat chat)
+        {
+            _context.UserToUserChats.Add(chat);
+            await _context.SaveChangesAsync();
+            return chat;
+        }
+
+        public async Task<UserToUserMessage> CreateUserToUserMessageAsync(UserToUserMessage message)
+        {
+            _context.UserToUserMessages.Add(message);
+            await _context.SaveChangesAsync();
+            return message;
+        }
+
+        public async Task MarkUserToUserMessageAsReadAsync(string messageId, string userId)
+        {
+            var message = await _context.UserToUserMessages.FirstOrDefaultAsync(m => m.Id == messageId);
+            if (message != null)
+            {
+                message.IsRead = true;
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

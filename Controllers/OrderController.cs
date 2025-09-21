@@ -29,13 +29,12 @@ namespace ConsolidatedApi.Controllers
             {
                 var order = new Order
                 {
-                    ClientOrganizationId = dto.ClientOrganizationId,
-                    Description = dto.Description,
+                    UserId = userId,
+                    OrderNumber = Guid.NewGuid().ToString("N")[..8],
                     Status = "Pending",
                     TotalAmount = dto.TotalAmount,
                     CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow,
-                    CreatedBy = userId
+                    UpdatedAt = DateTime.UtcNow
                 };
 
                 var createdOrder = await _orderService.CreateAsync(order);
@@ -62,7 +61,6 @@ namespace ConsolidatedApi.Controllers
                     return NotFound(new { message = "Order not found" });
                 }
 
-                existingOrder.Description = dto.Description;
                 existingOrder.Status = dto.Status;
                 existingOrder.TotalAmount = dto.TotalAmount;
                 existingOrder.UpdatedAt = DateTime.UtcNow;
@@ -104,7 +102,7 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(string id)
         {
             try
             {
@@ -124,7 +122,7 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] string? searchTerm, [FromQuery] int companyId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAll([FromQuery] string? searchTerm, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(userId))
@@ -132,30 +130,19 @@ namespace ConsolidatedApi.Controllers
 
             try
             {
-                var allOrders = await _orderService.GetAllAsync();
+                var orders = await _orderService.GetByUserIdAsync(userId, page, pageSize);
+                var totalCount = await _orderService.GetTotalCountByUserIdAsync(userId);
 
-                // Filter by company if specified
-                if (companyId > 0)
-                {
-                    allOrders = allOrders.Where(o => o.ClientOrganizationId == companyId).ToList();
-                }
-
-                // Apply search filter
+                // Apply search filter if provided
                 if (!string.IsNullOrWhiteSpace(searchTerm))
                 {
-                    allOrders = allOrders.Where(o => 
-                        (o.Description != null && o.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
-                        o.Status.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+                    orders = orders.Where(o => 
+                        o.Status.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                        o.OrderNumber.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
                     ).ToList();
                 }
 
-                var totalCount = allOrders.Count;
-                var paginatedOrders = allOrders
-                    .Skip((page - 1) * pageSize)
-                    .Take(pageSize)
-                    .ToList();
-
-                return Ok(new { totalCount, page, pageSize, data = paginatedOrders });
+                return Ok(new { totalCount, page, pageSize, data = orders });
             }
             catch (Exception ex)
             {
@@ -164,7 +151,7 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpGet("{id}/download")]
-        public async Task<IActionResult> DownloadInvoice(int id, [FromQuery] string lang, [FromQuery] string city, [FromQuery] string streetName, [FromQuery] string zipCode, [FromQuery] string phone, [FromQuery] string email)
+        public async Task<IActionResult> DownloadInvoice(string id, [FromQuery] string lang, [FromQuery] string city, [FromQuery] string streetName, [FromQuery] string zipCode, [FromQuery] string phone, [FromQuery] string email)
         {
             try
             {
@@ -180,22 +167,19 @@ namespace ConsolidatedApi.Controllers
 
     public class CreateOrderRequest
     {
-        public int ClientOrganizationId { get; set; }
-        public string? Description { get; set; }
         public decimal TotalAmount { get; set; }
     }
 
     public class UpdateOrderRequest
     {
-        public int Id { get; set; }
-        public string? Description { get; set; }
+        public string Id { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
         public decimal TotalAmount { get; set; }
     }
 
     public class PaymentMethodRequest
     {
-        public int OrderId { get; set; }
+        public string OrderId { get; set; } = string.Empty;
         public string PaymentMethod { get; set; } = string.Empty;
     }
 }

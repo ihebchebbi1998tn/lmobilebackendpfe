@@ -27,7 +27,7 @@ namespace ConsolidatedApi.Controllers
 
             try
             {
-                var invoices = await _invoicesService.GetAllAsync();
+                var invoices = await _invoicesService.GetByUserIdAsync(userId);
                 return Ok(invoices);
             }
             catch (Exception ex)
@@ -43,9 +43,9 @@ namespace ConsolidatedApi.Controllers
             {
                 var newInvoice = new Invoice
                 {
+                    UserId = userId,
                     InvoiceNumber = invoice.InvoiceNumber,
-                    ClientOrganizationId = invoice.ClientOrganizationId,
-                    IssueDate = invoice.IssueDate,
+                    IssuedDate = invoice.IssuedDate,
                     DueDate = invoice.DueDate,
                     TotalAmount = invoice.TotalAmount,
                     Status = "Pending",
@@ -63,7 +63,7 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] UpdateInvoiceRequest invoice)
+        public async Task<IActionResult> Update(string id, [FromBody] UpdateInvoiceRequest invoice)
         {
             try
             {
@@ -89,7 +89,7 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(string id)
         {
             try
             {
@@ -112,8 +112,7 @@ namespace ConsolidatedApi.Controllers
     public class CreateInvoiceRequest
     {
         public string InvoiceNumber { get; set; } = string.Empty;
-        public int ClientOrganizationId { get; set; }
-        public DateTime IssueDate { get; set; }
+        public DateTime IssuedDate { get; set; }
         public DateTime DueDate { get; set; }
         public decimal TotalAmount { get; set; }
     }

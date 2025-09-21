@@ -40,7 +40,7 @@ namespace ConsolidatedApi.Services
             return await query.CountAsync();
         }
 
-        public async Task<Device?> GetByIdAsync(int id)
+        public async Task<Device?> GetByIdAsync(string id)
         {
             return await _context.Devices.FindAsync(id);
         }
@@ -60,7 +60,7 @@ namespace ConsolidatedApi.Services
             return device;
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(string id)
         {
             var device = await _context.Devices.FindAsync(id);
             if (device != null)

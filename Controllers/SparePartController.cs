@@ -25,12 +25,13 @@ namespace ConsolidatedApi.Controllers
             {
                 var sparePart = new SparePart
                 {
+                    Title = dto.Title,
                     Name = dto.Name,
                     PartNumber = dto.PartNumber,
-                    Description = dto.Description,
+                    Description = dto.Description ?? string.Empty,
                     Price = dto.Price,
                     StockQuantity = dto.StockQuantity,
-                    ClientOrganizationId = dto.ClientOrganizationId,
+                    OrganizationId = dto.OrganizationId,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
@@ -54,12 +55,13 @@ namespace ConsolidatedApi.Controllers
                 {
                     var sparePart = new SparePart
                     {
+                        Title = sparePartDto.Title,
                         Name = sparePartDto.Name,
                         PartNumber = sparePartDto.PartNumber,
-                        Description = sparePartDto.Description,
+                        Description = sparePartDto.Description ?? string.Empty,
                         Price = sparePartDto.Price,
                         StockQuantity = sparePartDto.StockQuantity,
-                        ClientOrganizationId = sparePartDto.ClientOrganizationId,
+                        OrganizationId = sparePartDto.OrganizationId,
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow
                     };
@@ -87,9 +89,10 @@ namespace ConsolidatedApi.Controllers
                     return NotFound(new { message = "Spare part not found" });
                 }
 
+                existingSparePart.Title = sparePart.Title;
                 existingSparePart.Name = sparePart.Name;
                 existingSparePart.PartNumber = sparePart.PartNumber;
-                existingSparePart.Description = sparePart.Description;
+                existingSparePart.Description = sparePart.Description ?? existingSparePart.Description;
                 existingSparePart.Price = sparePart.Price;
                 existingSparePart.StockQuantity = sparePart.StockQuantity;
                 existingSparePart.UpdatedAt = DateTime.UtcNow;
@@ -104,16 +107,16 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] string? searchTerm, [FromQuery] int companyId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAll([FromQuery] string? searchTerm, [FromQuery] string? organizationId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             try
             {
                 var allSpareParts = await _sparePartService.GetAllAsync();
 
-                // Filter by company if specified
-                if (companyId > 0)
+                // Filter by organization if specified
+                if (!string.IsNullOrWhiteSpace(organizationId))
                 {
-                    allSpareParts = allSpareParts.Where(sp => sp.ClientOrganizationId == companyId).ToList();
+                    allSpareParts = allSpareParts.Where(sp => sp.OrganizationId == organizationId).ToList();
                 }
 
                 // Apply search filter
@@ -141,7 +144,7 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
+        public async Task<IActionResult> Delete(string id)
         {
             try
             {
@@ -163,17 +166,19 @@ namespace ConsolidatedApi.Controllers
 
     public class CreateSparePartRequest
     {
+        public string Title { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string? PartNumber { get; set; }
         public string? Description { get; set; }
         public decimal Price { get; set; }
         public int StockQuantity { get; set; }
-        public int ClientOrganizationId { get; set; }
+        public string OrganizationId { get; set; } = string.Empty;
     }
 
     public class UpdateSparePartRequest
     {
-        public int Id { get; set; }
+        public string Id { get; set; } = string.Empty;
+        public string Title { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string? PartNumber { get; set; }
         public string? Description { get; set; }

@@ -40,7 +40,7 @@ namespace ConsolidatedApi.Services
             return await query.CountAsync();
         }
 
-        public async Task<SparePart?> GetByIdAsync(int id)
+        public async Task<SparePart?> GetByIdAsync(string id)
         {
             return await _context.SpareParts.FindAsync(id);
         }
@@ -60,7 +60,7 @@ namespace ConsolidatedApi.Services
             return sparePart;
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(string id)
         {
             var sparePart = await _context.SpareParts.FindAsync(id);
             if (sparePart != null)

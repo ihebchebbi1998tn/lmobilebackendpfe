@@ -51,5 +51,15 @@ namespace ConsolidatedApi.Services
 
             await _context.SaveChangesAsync();
         }
+
+        public async Task DeleteAsync(string id)
+        {
+            var notification = await _context.Notifications.FindAsync(id);
+            if (notification != null)
+            {
+                _context.Notifications.Remove(notification);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

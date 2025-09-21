@@ -27,7 +27,7 @@ namespace ConsolidatedApi.Controllers
 
             try
             {
-                var stats = await _statsService.GetStatsAsync(userId);
+                var stats = await _statsService.GetUserStatsAsync(userId);
                 return Ok(stats);
             }
             catch (Exception ex)

@@ -132,17 +132,15 @@ namespace ConsolidatedApi.Controllers
 
             try
             {
-                var fileName = $"chat-files/{userId}/{Guid.NewGuid()}_{file.FileName}";
-                var contentType = file.ContentType;
+                var bucket = "uploads";
+                var objectName = fileName;
 
                 using var stream = file.OpenReadStream();
-                var objectName = await _minioService.UploadFileAsync(fileName, stream, contentType);
-                var presignedUrl = await _minioService.GetPresignedUrlAsync(objectName);
+                var storedPath = await _minioService.UploadFileAsync(bucket, objectName, stream, contentType);
 
                 return Ok(new
                 {
-                    presignedUrl = presignedUrl,
-                    objectName = objectName
+                    objectName = storedPath
                 });
             }
             catch (Exception ex)

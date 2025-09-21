@@ -28,9 +28,7 @@ namespace ConsolidatedApi.Controllers
                 var clientOrg = new ClientOrganization
                 {
                     Name = organization.Name,
-                    Email = organization.Email,
-                    Phone = organization.Phone,
-                    Website = organization.Website,
+                    EmailOrganisation = organization.Email,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
@@ -101,9 +99,7 @@ namespace ConsolidatedApi.Controllers
                 }
 
                 existingOrganization.Name = organization.Name;
-                existingOrganization.Email = organization.Email;
-                existingOrganization.Phone = organization.Phone;
-                existingOrganization.Website = organization.Website;
+                existingOrganization.EmailOrganisation = organization.Email;
                 existingOrganization.UpdatedAt = DateTime.UtcNow;
 
                 var updatedOrganization = await _clientOrganizationService.UpdateAsync(existingOrganization);
@@ -116,7 +112,7 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> ToggleOrganizationStatus(int id)
+        public async Task<IActionResult> ToggleOrganizationStatus(string id)
         {
             try
             {
@@ -149,7 +145,7 @@ namespace ConsolidatedApi.Controllers
                     return NotFound(new { message = "UI page not found" });
                 }
 
-                existingUiPage.PageName = uiPage.PageName;
+                existingUiPage.Name = uiPage.PageName;
                 existingUiPage.FieldsToNotDisplay = uiPage.FieldsToNotDisplay;
                 existingUiPage.UpdatedAt = DateTime.UtcNow;
 
@@ -229,7 +225,7 @@ namespace ConsolidatedApi.Controllers
 
     public class SimpleUpdateOrganizationRequest
     {
-        public int Id { get; set; }
+        public string Id { get; set; } = string.Empty;
         public string Name { get; set; } = string.Empty;
         public string? Email { get; set; }
         public string? Phone { get; set; }
