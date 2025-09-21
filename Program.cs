@@ -171,15 +171,19 @@ builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// CORS configuration - Allow any origin for development
+// CORS configuration
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy
-            .AllowAnyOrigin()
+            .WithOrigins(
+                "https://lmobileportal.vercel.app",
+                "https://preview--genesis-hello-joy.lovable.app"
+            )
             .AllowAnyMethod()
-            .AllowAnyHeader();
+            .AllowAnyHeader()
+            .AllowCredentials(); // only needed if you send cookies/authorization headers
     });
 });
 
@@ -246,11 +250,9 @@ app.MapControllerRoute(
     name: "default",
     pattern: "api/{controller}/{action=Index}/{id?}");
 
-// Map SignalR hubs to match frontend expectations
+// Map SignalR hubs
 app.MapHub<ChatHub>("/chathub");
 app.MapHub<UserToUserChatHub>("/usertouserhub");
 app.MapHub<NotificationHub>("/notificationhub");
-
-// Health check endpoint is handled by HealthController
 
 app.Run();
