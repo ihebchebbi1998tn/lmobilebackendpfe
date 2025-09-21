@@ -171,25 +171,15 @@ builder.Services.AddSignalR();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// CORS configuration for production
-var frontendUrl = Environment.GetEnvironmentVariable("FRONTEND_URL") ?? "http://localhost:3000";
+// CORS configuration - Allow any origin for development
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
         policy
-            .WithOrigins(
-                frontendUrl, 
-                "http://localhost:3000", 
-                "https://lmobileportal.vercel.app",
-                "https://*.vercel.app",
-                "https://*.onrender.com",
-                "https://*.lovableproject.com"
-            )
+            .AllowAnyOrigin()
             .AllowAnyMethod()
-            .AllowAnyHeader()
-            .AllowCredentials()
-            .SetIsOriginAllowedToAllowWildcardSubdomains();
+            .AllowAnyHeader();
     });
 });
 
