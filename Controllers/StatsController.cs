@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using ConsolidatedApi.Services;
+using ConsolidatedApi.Models;
 
 namespace ConsolidatedApi.Controllers
 {
@@ -9,6 +11,13 @@ namespace ConsolidatedApi.Controllers
     [Authorize]
     public class StatsController : ControllerBase
     {
+        private readonly StatsService _statsService;
+
+        public StatsController(StatsService statsService)
+        {
+            _statsService = statsService;
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetStats()
         {
@@ -16,14 +25,16 @@ namespace ConsolidatedApi.Controllers
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized(new { message = "User not authenticated" });
 
-            // TODO: Implement stats logic
-            return Ok(new { 
-                totalRequests = 0,
-                pendingRequests = 0,
-                completedRequests = 0,
-                totalOrders = 0,
-                revenue = 0
-            });
+            try
+            {
+                var stats = await _statsService.GetStatsAsync(userId);
+                return Ok(stats);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error retrieving stats", error = ex.Message });
+            }
         }
     }
+}
 }

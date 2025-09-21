@@ -15,15 +15,18 @@ namespace ConsolidatedApi.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IConfiguration _configuration;
+        private readonly AuthService _authService;
 
         public AuthController(
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            AuthService authService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
+            _authService = authService;
         }
 
         [HttpPost("login")]
@@ -42,7 +45,10 @@ namespace ConsolidatedApi.Controllers
             }
 
             var token = await GenerateJwtToken(user);
-            var refreshToken = GenerateRefreshToken();
+            
+            // Create refresh token using AuthService
+            var deviceId = $"{request.DeviceType}-{request.OperatingSystem}-{request.Browser}-{DateTime.UtcNow.Ticks}";
+            var refreshTokenEntity = await _authService.CreateRefreshTokenAsync(deviceId);
 
             // Set cookies
             var cookieOptions = new CookieOptions
@@ -54,7 +60,7 @@ namespace ConsolidatedApi.Controllers
             };
 
             Response.Cookies.Append("accessToken", token, cookieOptions);
-            Response.Cookies.Append("refreshToken", refreshToken, cookieOptions);
+            Response.Cookies.Append("refreshToken", refreshTokenEntity.Token, cookieOptions);
 
             return Ok(new
             {
@@ -113,9 +119,41 @@ namespace ConsolidatedApi.Controllers
                 return Unauthorized(new { message = "No refresh token provided" });
             }
 
-            // TODO: Implement proper refresh token validation
-            // For now, just return success to prevent frontend errors
-            return Ok(new { message = "Token refreshed successfully" });
+            try
+            {
+                var refreshTokenEntity = await _authService.GetRefreshTokenAsync(refreshToken);
+                if (refreshTokenEntity == null)
+                {
+                    return Unauthorized(new { message = "Invalid refresh token" });
+                }
+
+                // Get user from the device associated with refresh token
+                var user = await _userManager.FindByIdAsync(refreshTokenEntity.Device?.UserId ?? "");
+                if (user == null)
+                {
+                    return Unauthorized(new { message = "User not found" });
+                }
+
+                // Generate new JWT token
+                var newToken = await GenerateJwtToken(user);
+                
+                // Set new access token cookie
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                    Secure = true,
+                    SameSite = SameSiteMode.None,
+                    Expires = DateTime.UtcNow.AddMinutes(60)
+                };
+
+                Response.Cookies.Append("accessToken", newToken, cookieOptions);
+
+                return Ok(new { message = "Token refreshed successfully", accessToken = newToken });
+            }
+            catch (Exception ex)
+            {
+                return Unauthorized(new { message = "Error refreshing token", error = ex.Message });
+            }
         }
 
         [HttpGet("me")]

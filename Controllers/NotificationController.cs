@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using ConsolidatedApi.Services;
+using ConsolidatedApi.Models;
 
 namespace ConsolidatedApi.Controllers
 {
@@ -9,6 +11,13 @@ namespace ConsolidatedApi.Controllers
     [Authorize]
     public class NotificationController : ControllerBase
     {
+        private readonly NotificationService _notificationService;
+
+        public NotificationController(NotificationService notificationService)
+        {
+            _notificationService = notificationService;
+        }
+
         [HttpGet("notifications")]
         public async Task<IActionResult> GetNotifications()
         {
@@ -16,9 +25,15 @@ namespace ConsolidatedApi.Controllers
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
-            // TODO: Implement actual notification logic
-            // For now, return empty array to prevent 404
-            return Ok(new object[] { });
+            try
+            {
+                var notifications = await _notificationService.GetNotificationsForUserAsync(userId);
+                return Ok(notifications);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error retrieving notifications", error = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
@@ -28,8 +43,15 @@ namespace ConsolidatedApi.Controllers
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
-            // TODO: Implement delete notification logic
-            return Ok();
+            try
+            {
+                await _notificationService.DeleteAsync(id);
+                return Ok(new { message = "Notification deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error deleting notification", error = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
@@ -39,8 +61,16 @@ namespace ConsolidatedApi.Controllers
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized();
 
-            // TODO: Implement mark as read logic
-            return Ok();
+            try
+            {
+                await _notificationService.MarkAsReadAsync(id, userId);
+                return Ok(new { message = "Notification marked as read" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error marking notification as read", error = ex.Message });
+            }
         }
     }
+}
 }

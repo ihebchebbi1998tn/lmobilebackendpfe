@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using ConsolidatedApi.Services;
+using ConsolidatedApi.Models;
 
 namespace ConsolidatedApi.Controllers
 {
@@ -9,6 +11,13 @@ namespace ConsolidatedApi.Controllers
     [Authorize]
     public class InvoicesController : ControllerBase
     {
+        private readonly InvoicesService _invoicesService;
+
+        public InvoicesController(InvoicesService invoicesService)
+        {
+            _invoicesService = invoicesService;
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -16,29 +25,105 @@ namespace ConsolidatedApi.Controllers
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized(new { message = "User not authenticated" });
 
-            // TODO: Implement get all invoices logic
-            return Ok(new object[] { });
+            try
+            {
+                var invoices = await _invoicesService.GetAllAsync();
+                return Ok(invoices);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error retrieving invoices", error = ex.Message });
+            }
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] object invoice)
+        public async Task<IActionResult> Create([FromBody] CreateInvoiceRequest invoice)
         {
-            // TODO: Implement invoice creation logic
-            return Ok(new { message = "Invoice created" });
+            try
+            {
+                var newInvoice = new Invoice
+                {
+                    InvoiceNumber = invoice.InvoiceNumber,
+                    ClientOrganizationId = invoice.ClientOrganizationId,
+                    IssueDate = invoice.IssueDate,
+                    DueDate = invoice.DueDate,
+                    TotalAmount = invoice.TotalAmount,
+                    Status = "Pending",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+
+                var createdInvoice = await _invoicesService.CreateAsync(newInvoice);
+                return Ok(new { message = "Invoice created successfully", invoice = createdInvoice });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error creating invoice", error = ex.Message });
+            }
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] object invoice)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateInvoiceRequest invoice)
         {
-            // TODO: Implement invoice update logic
-            return Ok(new { message = "Invoice updated" });
+            try
+            {
+                var existingInvoice = await _invoicesService.GetByIdAsync(id);
+                if (existingInvoice == null)
+                {
+                    return NotFound(new { message = "Invoice not found" });
+                }
+
+                existingInvoice.InvoiceNumber = invoice.InvoiceNumber;
+                existingInvoice.TotalAmount = invoice.TotalAmount;
+                existingInvoice.Status = invoice.Status;
+                existingInvoice.DueDate = invoice.DueDate;
+                existingInvoice.UpdatedAt = DateTime.UtcNow;
+
+                var updatedInvoice = await _invoicesService.UpdateAsync(existingInvoice);
+                return Ok(new { message = "Invoice updated successfully", invoice = updatedInvoice });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error updating invoice", error = ex.Message });
+            }
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            // TODO: Implement invoice delete logic
-            return Ok(new { message = "Invoice deleted" });
+            try
+            {
+                var invoice = await _invoicesService.GetByIdAsync(id);
+                if (invoice == null)
+                {
+                    return NotFound(new { message = "Invoice not found" });
+                }
+
+                await _invoicesService.DeleteAsync(id);
+                return Ok(new { message = "Invoice deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = "Error deleting invoice", error = ex.Message });
+            }
         }
     }
+
+    public class CreateInvoiceRequest
+    {
+        public string InvoiceNumber { get; set; } = string.Empty;
+        public int ClientOrganizationId { get; set; }
+        public DateTime IssueDate { get; set; }
+        public DateTime DueDate { get; set; }
+        public decimal TotalAmount { get; set; }
+    }
+
+    public class UpdateInvoiceRequest
+    {
+        public string InvoiceNumber { get; set; } = string.Empty;
+        public DateTime DueDate { get; set; }
+        public decimal TotalAmount { get; set; }
+        public string Status { get; set; } = string.Empty;
+    }
+}
 }
