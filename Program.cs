@@ -20,20 +20,46 @@ var builder = WebApplication.CreateBuilder(args);
 QuestPDF.Settings.License = LicenseType.Community;
 
 // Database configuration - Use Neon PostgreSQL
-var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
-Console.WriteLine($"Raw DATABASE_URL: '{connectionString}'");
+var databaseUrl = Environment.GetEnvironmentVariable("DATABASE_URL");
+Console.WriteLine($"Raw DATABASE_URL: '{databaseUrl}'");
 
-if (string.IsNullOrEmpty(connectionString))
+if (string.IsNullOrEmpty(databaseUrl))
 {
-    connectionString = "postgresql://neondb_owner:npg_CAiFLbX85sIq@ep-summer-fire-adwac3xi-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
-    Console.WriteLine("Using fallback connection string");
+    databaseUrl = "postgresql://neondb_owner:npg_CAiFLbX85sIq@ep-summer-fire-adwac3xi-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require";
+    Console.WriteLine("Using fallback DATABASE_URL");
 }
 
-// Clean and rebuild connection string to avoid parsing issues
-var connectionParts = connectionString.Split('?')[0]; // Get base connection without parameters
-connectionString = $"{connectionParts}?sslmode=require&channel_binding=require";
+// Convert DATABASE_URL (URI) to Npgsql connection string to avoid parsing issues
+string BuildNpgsqlConnectionString(string url)
+{
+    try
+    {
+        var uri = new Uri(url);
+        var userInfo = uri.UserInfo.Split(':', 2);
+        var username = Uri.UnescapeDataString(userInfo[0]);
+        var password = userInfo.Length > 1 ? Uri.UnescapeDataString(userInfo[1]) : "";
 
-Console.WriteLine($"Final connection string: '{connectionString}'");
+        var host = uri.Host;
+        var port = uri.IsDefaultPort ? 5432 : uri.Port;
+        var database = uri.AbsolutePath.TrimStart('/');
+
+        // Build Npgsql-style connection string
+        return $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true";
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Failed to parse DATABASE_URL as URI. Using raw with enforced SSL. Error: {ex.Message}");
+        var raw = url ?? "";
+        if (!raw.Contains("SSL Mode=", StringComparison.OrdinalIgnoreCase))
+        {
+            raw += (raw.EndsWith(";") || raw.Length == 0 ? "" : ";") + "SSL Mode=Require;Trust Server Certificate=true";
+        }
+        return raw;
+    }
+}
+
+var connectionString = BuildNpgsqlConnectionString(databaseUrl);
+Console.WriteLine($"Final Npgsql connection string: '{connectionString}'");
 
 // Stripe configuration
 var stripeSecretKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
