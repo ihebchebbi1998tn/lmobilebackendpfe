@@ -21,20 +21,19 @@ QuestPDF.Settings.License = LicenseType.Community;
 
 // Database configuration - Use Neon PostgreSQL
 var connectionString = Environment.GetEnvironmentVariable("DATABASE_URL");
+Console.WriteLine($"Raw DATABASE_URL: '{connectionString}'");
+
 if (string.IsNullOrEmpty(connectionString))
 {
     connectionString = "postgresql://neondb_owner:npg_CAiFLbX85sIq@ep-summer-fire-adwac3xi-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require";
+    Console.WriteLine("Using fallback connection string");
 }
 
-// Ensure connection string is properly formatted
-if (!connectionString.Contains("sslmode="))
-{
-    connectionString += connectionString.Contains("?") ? "&sslmode=require" : "?sslmode=require";
-}
-if (!connectionString.Contains("channel_binding="))
-{
-    connectionString += "&channel_binding=require";
-}
+// Clean and rebuild connection string to avoid parsing issues
+var connectionParts = connectionString.Split('?')[0]; // Get base connection without parameters
+connectionString = $"{connectionParts}?sslmode=require&channel_binding=require";
+
+Console.WriteLine($"Final connection string: '{connectionString}'");
 
 // Stripe configuration
 var stripeSecretKey = Environment.GetEnvironmentVariable("STRIPE_SECRET_KEY");
