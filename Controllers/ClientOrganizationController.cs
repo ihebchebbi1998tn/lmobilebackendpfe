@@ -71,7 +71,7 @@ namespace ConsolidatedApi.Controllers
                     Longitude = request.Longitude,
                     Latitude = request.Latitude,
                     OnlinePaymentSolutions = request.OnlinePaymentSolutions,
-                    IsBgRemoved = request.IsBgRemoved,
+                    IsBgRemoved = request.IsBgRemoved ?? false,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };

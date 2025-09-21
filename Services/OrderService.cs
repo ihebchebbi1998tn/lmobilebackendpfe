@@ -54,5 +54,15 @@ namespace ConsolidatedApi.Services
         {
             return await _context.Orders.ToListAsync();
         }
+
+        public async Task DeleteAsync(string id)
+        {
+            var order = await _context.Orders.FindAsync(id);
+            if (order != null)
+            {
+                _context.Orders.Remove(order);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

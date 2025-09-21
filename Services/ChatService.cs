@@ -108,5 +108,23 @@ namespace ConsolidatedApi.Services
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<List<ChatMessage>> GetMessagesByUserIdAsync(string userId)
+        {
+            return await _context.ChatMessages
+                .Where(m => m.UserId == userId)
+                .OrderBy(m => m.CreatedAt)
+                .ToListAsync();
+        }
+
+        public async Task DeleteMessageAsync(string messageId)
+        {
+            var message = await _context.ChatMessages.FirstOrDefaultAsync(m => m.Id == messageId);
+            if (message != null)
+            {
+                _context.ChatMessages.Remove(message);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

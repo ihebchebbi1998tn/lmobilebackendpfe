@@ -133,10 +133,11 @@ namespace ConsolidatedApi.Controllers
             try
             {
                 var bucket = "uploads";
-                var objectName = fileName;
+                var fileName = $"{Guid.NewGuid()}_{file.FileName}";
+                var contentType = file.ContentType;
 
                 using var stream = file.OpenReadStream();
-                var storedPath = await _minioService.UploadFileAsync(bucket, objectName, stream, contentType);
+                var storedPath = await _minioService.UploadFileAsync(bucket, fileName, stream, contentType);
 
                 return Ok(new
                 {
