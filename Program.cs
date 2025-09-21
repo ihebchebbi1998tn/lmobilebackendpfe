@@ -145,7 +145,8 @@ builder.Services.AddCors(options =>
                 "http://localhost:3000", 
                 "https://lmobileportal.vercel.app",
                 "https://*.vercel.app",
-                "https://*.onrender.com"
+                "https://*.onrender.com",
+                "https://*.lovableproject.com"
             )
             .AllowAnyMethod()
             .AllowAnyHeader()
@@ -179,11 +180,12 @@ using (var scope = app.Services.CreateScope())
 }
 
 // Configure middleware pipeline
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Consolidated API v1");
+    c.RoutePrefix = string.Empty; // Set Swagger UI as the default page
+});
 
 app.UseRouting();
 app.UseCors("AllowFrontend");
@@ -208,13 +210,18 @@ app.MapControllerRoute(
     pattern: "notification/api/{controller}/{action=Index}/{id?}");
 
 app.MapControllerRoute(
+    name: "gateway",
+    pattern: "gateway/{action=Index}/{id?}",
+    defaults: new { controller = "Gateway" });
+
+app.MapControllerRoute(
     name: "default",
     pattern: "api/{controller}/{action=Index}/{id?}");
 
 // Map SignalR hubs to match frontend expectations
-app.MapHub<ChatHub>("/chat/chat/hub");
-app.MapHub<UserToUserChatHub>("/chat/chat/UserToUser/hub");
-app.MapHub<NotificationHub>("/notification/notification/hub");
+app.MapHub<ChatHub>("/chathub");
+app.MapHub<UserToUserChatHub>("/usertouserhub");
+app.MapHub<NotificationHub>("/notificationhub");
 
 // Health check endpoint is handled by HealthController
 

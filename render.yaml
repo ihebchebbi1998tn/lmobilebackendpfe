@@ -25,7 +25,7 @@ services:
       - key: STRIPE_SECRET_KEY
         value: your_stripe_secret_key_here
       - key: FRONTEND_URL
-        value: https://your-frontend-app.vercel.app
+        value: https://8dd5c1af-9726-4c1e-93bc-fc4dc0b53ee3.lovableproject.com
       - key: ADMIN_EMAIL
         value: elfadanes@gmail.com
       - key: ADMIN_PASSWORD

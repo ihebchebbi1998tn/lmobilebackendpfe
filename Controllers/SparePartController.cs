@@ -31,7 +31,7 @@ namespace ConsolidatedApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] string? searchTerm, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+        public async Task<IActionResult> GetAll([FromQuery] string? searchTerm, [FromQuery] int companyId, [FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
             // TODO: Implement get all spare parts logic
             return Ok(new { totalCount = 0, page, pageSize, data = new object[] { } });

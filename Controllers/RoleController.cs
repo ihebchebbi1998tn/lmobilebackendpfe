@@ -5,15 +5,29 @@ using System.Security.Claims;
 namespace ConsolidatedApi.Controllers
 {
     [ApiController]
-    [Route("user/api/Role")]
+    [Route("user/api/role")]
     [Authorize]
     public class RoleController : ControllerBase
     {
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] string? searchTerm, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
         {
             // TODO: Implement get all roles logic
             return Ok(new object[] { });
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
+        {
+            // TODO: Implement get role by id logic
+            return Ok(new { message = "Role found" });
+        }
+
+        [HttpGet("ByUserId/{userId}")]
+        public async Task<IActionResult> GetByUserId(int userId)
+        {
+            // TODO: Implement get role by user id logic
+            return Ok(new { message = "User role found" });
         }
 
         [HttpPost]

@@ -118,6 +118,32 @@ namespace ConsolidatedApi.Controllers
             return Ok(new { message = "Token refreshed successfully" });
         }
 
+        [HttpGet("me")]
+        public async Task<IActionResult> GetCurrentUser([FromQuery] string deviceType = "", [FromQuery] string operatingSystem = "", [FromQuery] string browser = "")
+        {
+            var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdClaim))
+            {
+                return Unauthorized(new { message = "User not authenticated" });
+            }
+
+            var user = await _userManager.FindByIdAsync(userIdClaim);
+            if (user == null)
+            {
+                return NotFound(new { message = "User not found" });
+            }
+
+            return Ok(new
+            {
+                id = user.Id,
+                firstName = user.FirstName,
+                lastName = user.LastName,
+                email = user.Email,
+                phoneNumber = user.PhoneNumber,
+                // Add other user properties as needed
+            });
+        }
+
         [HttpPost("generate-reset-token")]
         public async Task<IActionResult> GenerateResetToken([FromBody] ResetTokenRequest request)
         {
@@ -233,6 +259,10 @@ namespace ConsolidatedApi.Controllers
     {
         public string Email { get; set; } = string.Empty;
         public string Password { get; set; } = string.Empty;
+        public bool RememberMe { get; set; }
+        public string DeviceType { get; set; } = string.Empty;
+        public string OperatingSystem { get; set; } = string.Empty;
+        public string Browser { get; set; } = string.Empty;
     }
 
     public class RegisterRequest
