@@ -224,7 +224,17 @@ builder.Services.AddCors(options =>
             )
             .AllowAnyMethod()
             .AllowAnyHeader()
-            .AllowCredentials(); // only needed if you send cookies/authorization headers
+            .AllowCredentials()
+            .SetIsOriginAllowedToAllowWildcardSubdomains(); // More permissive for development
+    });
+    
+    // Add a more permissive policy for development
+    options.AddPolicy("Development", policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
     });
 });
 
