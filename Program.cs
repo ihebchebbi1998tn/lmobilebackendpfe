@@ -219,7 +219,8 @@ builder.Services.AddCors(options =>
         policy
             .WithOrigins(
                 "https://lmobileportal.vercel.app",
-                "https://preview--genesis-hello-joy.lovable.app"
+                "https://preview--genesis-hello-joy.lovable.app",
+                "https://cd5be52a-f84e-471e-915b-176724baadb5.lovableproject.com"
             )
             .AllowAnyMethod()
             .AllowAnyHeader()
